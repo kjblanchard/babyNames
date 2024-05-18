@@ -4,6 +4,6 @@
 
 all: build run
 build:
-	@go build -C src
+	@GOARCH=amd64 go build -C src
 run:
 	@cd src && ./baby_names

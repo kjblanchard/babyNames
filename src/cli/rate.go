@@ -23,7 +23,7 @@ func checkIfAlreadyRated(name string, names []models.BabyName) bool {
 }
 
 func startInteraction(gender string) {
-	fmt.Printf("Lets rate some names! Currently we are going to rate %s names\n%s\n0 is terrible, 10 is great\n\n", gender, "**********")
+	fmt.Printf("Lets rate some names! Currently we are going to rate %s names\n%s\n0 is terrible, 10 is great\n***\n", gender, "***")
 }
 
 func presentName(name models.BabyName) int {
@@ -40,18 +40,19 @@ func presentName(name models.BabyName) int {
 	}
 }
 
-func addBabyName(name models.BabyName, namesFull []models.BabyName) {
-	namesFull = append(namesFull, name)
-	// data, err := json.Marshal(map[string][]models.BabyName{"names": namesFull})
-	data, err := json.Marshal(map[string][]models.BabyName{"names": namesFull})
+func addBabyName(name models.BabyName) {
+	ratedNames := utils.GetRatedNames(RATINGS_FILE_NAME)
+	ratedNames = append(ratedNames, name)
+	data, err := json.Marshal(map[string][]models.BabyName{"names": ratedNames})
 	if err != nil {
 		panic(err)
 	}
-	err = os.WriteFile("ratings.json", data, 0644)
+	err = os.WriteFile(RATINGS_FILE_NAME, data, 0644)
 	if err != nil {
 		panic(err)
 	}
 }
+
 func RateNames() {
 	for {
 		gender := rand.Intn(3)
@@ -61,6 +62,8 @@ func RateNames() {
 		for _, name := range namesApiResponse {
 			if !checkIfAlreadyRated(name.Name, ratings) {
 				namesNotRated = append(namesNotRated, name)
+			} else {
+
 			}
 		}
 		genderStr, err := utils.GetGenderString(gender)
@@ -70,7 +73,7 @@ func RateNames() {
 		startInteraction(genderStr)
 		for _, babyName := range namesNotRated {
 			babyName.Rank = presentName(babyName)
-			addBabyName(babyName, ratings)
+			addBabyName(babyName)
 		}
 		var currentInput string
 		fmt.Print("Would you like to continue rating names? (1 to continue, anything else quits): ")
@@ -78,6 +81,5 @@ func RateNames() {
 		if currentInput != "1" {
 			break
 		}
-
 	}
 }
